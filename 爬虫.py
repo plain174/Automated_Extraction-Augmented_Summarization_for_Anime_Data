@@ -57,14 +57,17 @@ def fix_name(cartoon_data):
             print(cartoon_data[x]['中文名'])
             time.sleep(0.5)
 def down_pic(m,n):#m为网址解析，n为图片存储地址
-    for x in m.split('\n'):
-        if 'width' in x and 'jpg' in x:
-            x=x.split("\"")# 1和9都是，但是9糊
-            if not os.path.exists(n):
-                with open(n,"wb") as f:
-                    #print(x[1],x[9])
-                    request = urllib.request.Request("http:"+x[1],headers=headers)
-                    f.write(urllib.request.urlopen(request,timeout=5).read())
+    try:
+        for x in m.split('\n'):
+            if 'width' in x and 'jpg' in x:
+                x=x.split("\"")# 1和9都是，但是9糊
+                if not os.path.exists(n):
+                    with open(n,"wb") as f:
+                        #print(x[1],x[9])
+                        request = urllib.request.Request("http:"+x[1],headers=headers)
+                        f.write(urllib.request.urlopen(request,timeout=5).read())
+    except:
+        down_pic(m, n)
 def down_pic_usual(m,n):
     with open(n, "wb") as f:
         try:
@@ -121,6 +124,7 @@ def get_save(m,n,id,person_data_total,character_data_total):#m为本体,n=m+'/ch
         for x3 in x2:
             if ':' in x3:
                 x4[x3.split(':')[0]] = ":".join(x3.split(':')[1:])
+#这边记得加具体变量名
         ep.append(x4)
 
     soup1=BeautifulSoup(n,"html.parser",from_encoding="utf-8")

@@ -135,16 +135,22 @@ Potential_Future_Directions_tex=r'''
 \section{Potential Future Directions}
 以下按实现难度和实现迫切性排列
 \begin{itemize}
-    \item 自动爬取动漫原声集
-    \item 管理用户写的动漫评论
-    \item 引入模糊搜索，利用用户给的名字自动获得bangumi号
-    \item 引入更强大的动漫tag系统进行tag分析
-    \item 爬取更多关于角色的信息。在P站爬取主角的图片。
-    \item 对于爬取的无结构文本使用AI进行解析利用
-    \item 制作网站
-    \item 制作图形化界面，让普通用户能轻松过使用
+    \item   自动爬取动漫原声集
+    \item   管理用户写的动漫评论
+    \item √ 引入模糊搜索，利用用户给的名字自动获得bangumi号
+    \item   引入更强大的动漫tag系统进行tag分析
+    \item   爬取更多关于角色的信息。在P站爬取主角的图片。
+    \item   对于爬取的无结构文本使用AI进行解析利用
+    \item   制作网站
+    \item   制作图形化界面，让普通用户能轻松过使用
 \end{itemize}
-本次更新内容：大贤者(AESA)系统初创
+本次更新内容：引入模糊搜索，利用用户给的名字自动获得bangumi号
+\begin{center}
+\textbf{\Large ltimation}
+\end{center}
+\begin{itemize}
+\item 搜索出的bangumi号生成excel数据处理中会有不知名bug
+\end{itemize}
 \begin{center}
 \textbf{\Large Reference}
 \end{center}
@@ -156,5 +162,42 @@ Potential_Future_Directions_tex=r'''
 [3]Overleaf仅仅是一个LaTeX的在线解释器。LaTex格式跟HTML格式一样，用一部分命令和规范代替了所见即所得的编辑，但是用在代码生成文本方面很方便。
 我在爬取数据后需要一个方便的输出，仅仅输出一个word文档就太丑了，但是以图片格式输出的话编译又会很麻烦。所以我选择了标记语言自动转换成PDF来输出。网址https://www.overleaf.com/project
 
-[4]Tex Live    官网网址https://tug.org/texlive/安装的网址镜像站https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/
+[4]Tex Live 测试指令: tex --version 生成pdf指令: xelatex tex.tex --interaction=nonstopmode  官网网址https://tug.org/texlive/安装的网址镜像站https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/
+'''
+
+Test_tex=r'''
+\documentclass[lettersize,journal,article,UniThesis]{IEEEtran}
+\usepackage{ctex}
+\setCJKmainfont{SIMSUN.TTC}
+\usepackage{graphicx}
+
+
+\begin{document}
+
+\title{Test}
+
+\author{满分：100分}
+
+\maketitle
+\begin{center}
+\textbf{\Large 看图识人(60分)}
+\end{center}
+每题两分\\
+te1st
+\maketitle
+\begin{center}
+\textbf{\Large 看集名识片(30分)}
+\end{center}
+每题三分\\
+te2st
+\maketitle
+\begin{center}
+\textbf{\Large 看OP和ED名字识片(10分)}
+\end{center}
+每题两分\\
+te3st
+\vfill
+
+\end{document}
+
 '''

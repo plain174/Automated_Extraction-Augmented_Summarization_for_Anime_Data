@@ -30,7 +30,7 @@ def result(text_name,mark_flag=False):
     total_time6=0
     total_time7=[]#追番的占比时长
     for x in range(len(m2)):
-        m2[x]=m2[x].strip().split(',')
+        m2[x]=m2[x].strip().split(',')  ##['1', '1', '星际牛仔', '1998年10月23日', '1999年4月23日', 26, 24, 624]
         if '日' in m2[x][0]:#导入看番估计时间点
             m1.append([m2[x][0],x])
         elif not(m2[x][0][0] in '0123456789' and m2[x][1][0] in '123456789'):
@@ -42,11 +42,12 @@ def result(text_name,mark_flag=False):
             m2[x][6]=int(m2[x][6])
             m2[x][5]=int(m2[x][5])
             m2[x].append(m2[x][5]*m2[x][6])
-            totol_time2+=(D2I(m2[x][3])+D2I(m2[x][4]))/2*m2[x][7]
+            if m2[x][3]!='None':
+                totol_time2+=(D2I(m2[x][3])+D2I(m2[x][4]))/2*m2[x][7]
+                total_time4[m2[x][3][:m2[x][3].find("年")]] = total_time4.get(m2[x][3][:m2[x][3].find("年")], 0) + 1
+                total_time5[m2[x][4][:m2[x][3].find("年")]] = total_time5.get(m2[x][4][:m2[x][4].find("年")], 0) + 1
+                ANI_DATE.append([D2I(m2[x][3]), D2I(m2[x][4])])
             totol_time3+=m2[x][7]
-            total_time4[m2[x][3][:m2[x][3].find("年")]]=total_time4.get(m2[x][3][:m2[x][3].find("年")],0)+1
-            total_time5[m2[x][4][:m2[x][3].find("年")]]=total_time5.get(m2[x][4][:m2[x][4].find("年")],0)+1
-            ANI_DATE.append([D2I(m2[x][3]),D2I(m2[x][4])])
     AVG_TIME=I2D(totol_time2/totol_time3) #平均时间指向点
 
 
@@ -76,14 +77,17 @@ def result(text_name,mark_flag=False):
             a=D2I(m1[y][0])
             b=D2I(m1[y+1][0])
             for x in range(len(z)):
-                if b>D2I(z[x][3])>a or a<D2I(z[x][4])<b:
-                    total_time7.append(z[x][7])
-                    total_time8+=z[x][7]
+                if z[x][3]!='None':
+                    if b>D2I(z[x][3])>a or a<D2I(z[x][4])<b:
+                        total_time7.append(z[x][7])
+                        total_time8+=z[x][7]
             UPDATE_TOTAL.append(total_time8/sum(n)) #局部追番占比
     UPDATE_SUM=sum(total_time7[1:])/totol_time3
-
-    ANI_TIME_TOTAL=int(sum(total_time)/24/12),"季",int(sum(total_time)/24%12),'集'#总时长
-    ANI_AVG=sum(total_time[1:])/(D2I(m1[-1][0])-D2I(m1[1][0]))/24#总一天看番率
+    ANI_TIME_TOTAL = int(sum(total_time) / 24 / 12), "季", int(sum(total_time) / 24 % 12), '集'  # 总时长
+    try:
+        ANI_AVG=sum(total_time[1:])/(D2I(m1[-1][0])-D2I(m1[1][0]))/24#总一天看番率
+    except :
+        ANI_AVG='fail'
     RE={    'AVG_TIME':AVG_TIME,
     'TIME_SUM_RESULT':TIME_SUM_RESULT,
     'TIME_POINT_TOTAL':TIME_POINT_TOTAL,
