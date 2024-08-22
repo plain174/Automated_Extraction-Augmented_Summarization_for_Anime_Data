@@ -182,13 +182,13 @@ Test_tex=r'''
 \begin{center}
 \textbf{\Large 看图识人(60分)}
 \end{center}
-每题两分\\
+每题两分 选出正确的人名\\
 te1st
 \maketitle
 \begin{center}
 \textbf{\Large 看集名识片(30分)}
 \end{center}
-每题三分\\
+每题三分  请根据给出的四个番剧集名选出正确的动漫名\\
 te2st
 \maketitle
 \begin{center}

@@ -186,7 +186,7 @@ def get_person_rank():
 def generate():
     def add_pic(docker, key, url, li):
         if docker[key]['download'] == True:
-            path = init_menu + "save/save/images/" + url + str(key) + ".jpg"
+            path = init_menu + "save/test/images/" + url + str(key) + ".jpg"
             if not os.path.exists(path):
                 src = init_menu + 'save/total_img/' + url + str(key) + '.jpg'
                 tar = path
@@ -195,19 +195,25 @@ def generate():
                 r'''\includegraphics[width=0.2\textwidth]{images/''' + url + r'''PIC}'''.replace('PIC',                                                                                str(key) + ".jpg"))
         return li
     ANS=[]
-    m={'主角':[],'配角':[],'客串':[]}
+    role_dict={'主角':[],'配角':[],'客串':[]}
     for x in character_data.keys():
         if character_data[x]['download']==True:
-            m[character_data[x]['role']].append(x)
+            role_dict[character_data[x]['role']].append(x)
     def add(role,number):
-        main=m['role']
+        main=role_dict[role]
         random.shuffle(main)
         main1=main[:number]
+        tmp1 = []
+        tmp1.append(r'\textbf{%s：}'%role+'共%d道题'%number+r'\newline')
+        count=0
         for x in main1:
+            count+=1
             random.shuffle(main)
             tmp=main[:4]+[x]
             random.shuffle(tmp)
-            tmp1=[]
+            tmp1=add_pic(character_data_total,x,'character/', tmp1)
+            tmp1.append(r' \newline ')
+            tmp1.append(r'第%d题：\\'%count)
             for x1 in range(len(tmp)):
                 if character_data[tmp[x1]]['name'][1] != None:
                     name = character_data[tmp[x1]]['name'][1]
@@ -216,45 +222,73 @@ def generate():
                 if tmp[x1]==x:
                     ANS.append(chr(ord('A')+x1))
                 tmp1.append(chr(ord('A')+x1)+':'+ ' '+name+r'\\')
-                tmp1=add_pic(character_data_total, tmp[x1],'character/', tmp)
-                tmp1.append(r'\newline')
+            tmp1.append(r' \newline ')
         return tmp1
 
     #15 主角 10 配角 5 客串 每个2分 60
     #10部作品 四个ep名字 每个3分 30
     #5部作品的OP+ED名 2分
-    path = "simsun.ttc"
+    path = init_menu+'save/test/SIMSUN.ttc'
     if not os.path.exists(path):
-        src = total_menu + "save/test/simsun.ttc"
+        src = total_menu + "save/simsun.ttc"
         tar = path
         shutil.copy(src, tar)
     with open(init_menu+'save/test/test.tex','w',encoding='utf-8') as f:
         ANS.append('第一部分')
-        m=overleaf.Main_Test_textex
+        m=overleaf.Test_tex
         a=add('主角',15)+add('配角', 10)+ add('客串', 5)
-        m.replace('te1st',"".join(a))
+        m=m.replace('te1st',"".join(a))
+        ANS.append('第二部分')
         b=[]
-        for x in cartoon_data.keys():
-            if len(cartoon_data[x]['ep'])>10:
-                b.append(x)
+        for key in cartoon_data.keys():
+            if len(list(x for x in cartoon_data[key]['ep'] if '中文标题'in x))>10:
+                b.append(key)
+        b2=[]
+        for x in b:
+            b3=[x,[]]
+            for y in cartoon_data[x]['ep']:
+                if '中文标题' in y:
+                    b3[1].append(y['中文标题'])
+            b2.append(b3)
+        tmp=[]
+        random.shuffle(b2)
+        question=b2[:10]
+        for ep in range(len(question)):
+            tmp.append(r'\\第%d题:\\'%(ep+1))
+            random.shuffle(question[ep][1])
+            for ep1 in question[ep][1][:4]:
+                tmp.append(r'%s\\'%ep1)
+            random.shuffle(b2)
+            tmp1= list(cartoon_data[x[0]]['中文名'] for x in b2[:4])+[cartoon_data[question[ep][0]]['中文名']]
+            random.shuffle(tmp1)
+            for x1 in range(len(tmp1)):
+                if tmp1[x1]==cartoon_data[question[ep][0]]['中文名']:
+                    ANS.append(chr(ord('A')+x1))
+                tmp.append(chr(ord('A')+x1)+':'+ ' '+tmp1[x1]+r'\\')
+        m = m.replace('te2st', "".join(tmp))
         c=[]
         ANS.append('第三部分')
+        count=0
+        tmp1 = []
         for x in cartoon_data.keys():
             if '片头曲' in cartoon_data[x].keys() and '片尾曲' in cartoon_data[x].keys():
                 c.append(x)
-        for x in c:
+        random.shuffle(c)
+        op=c[:5]
+        for x in op:
+            count+=1
+            tmp1.append(r' \\第%d题：\\ '%count)
             random.shuffle(c)
             tmp=c[:4]+[x]
-            random.shuffle(c)
-            tmp1=[]
-            tmp1.append('片头曲:'+cartoon_data[x]['片头曲']+r'//'+'片尾曲'+cartoon_data[x]['片尾曲']+r'//')
+            random.shuffle(tmp)
+            tmp1.append('片头曲:'+cartoon_data[x]['片头曲']+r'\\'+'片尾曲'+cartoon_data[x]['片尾曲']+r'\\')
             for x1 in range(len(tmp)):
                 if tmp[x1]==x:
                     ANS.append(chr(ord('A')+x1))
                 tmp1.append(chr(ord('A')+x1)+':'+ ' '+cartoon_data[tmp[x1]]['中文名']+r'\\')
-        m.replace('te3st', "".join(c))
+        m=m.replace('te3st', "".join(tmp1))
         f.write(m)
-    print(ANS)
+    print(" ".join(ANS))
 
 def draw():
     plt.rcParams['font.sans-serif'] = ['SimSun']  # 宋体
@@ -553,8 +587,8 @@ def main(user):
         m=overleaf.Potential_Future_Directions_tex
         f.write(m)
 
-main('薛定谔的猫')
-
+#main('薛定谔的猫')
+generate()
     # USER看番数为 LOOK_COUNT1（系列作合并）\\
     # USER等效总计看番部数为 LOOK_COUNT2\\
     # USER所看番剧所发布时间中位数为 MEDIUM\\
