@@ -3,7 +3,9 @@ from main import *
 import overleaf
 import matplotlib.pyplot as plt
 import subprocess
+from pyiter import it
 from matplotlib.font_manager import FontProperties
+import random
 def Max():
     return len(cartoon_rank1)
 def to_csv():
@@ -13,6 +15,8 @@ def to_csv():
             if type(x)==str:
                 f.write(x+'\n')
             else:
+                if type(x)!=list:
+                    continue
                 id=str(x[-1])
                 x=x[:-1]+[cartoon_data[id]['放送开始'],cartoon_data[id]['播放结束'],int(cartoon_data[id]['话数'])]
                 '''
@@ -102,19 +106,6 @@ def check():
     print(total)
 
     return height,weight
-    '''
-    #tag不启用
-    print('tag')
-    result = {}
-    for i in cartoon_data.keys():
-        for y in cartoon_data[i]['tag'].keys():
-                result[y]=result.get(y,0)+1
-    print(len(result.keys()))
-    a=pandas.Series(result)
-    a.sort_values(ascending=False)
-    #with open('example.txt','w',encoding='utf-8') as f:
-    #    a.to_csv(f,encoding='utf-8')
-    '''
 def get_norml_result():
     print('总动漫部数：',len(cartoon_rank1))
     print('总动漫部数(归类后)：' , len(cartoon_rank2))
@@ -191,6 +182,79 @@ def get_person_rank():
     func("男", "配角"),
     func("女", "主角"),
     func("女", "配角")]
+
+def generate():
+    def add_pic(docker, key, url, li):
+        if docker[key]['download'] == True:
+            path = init_menu + "save/save/images/" + url + str(key) + ".jpg"
+            if not os.path.exists(path):
+                src = init_menu + 'save/total_img/' + url + str(key) + '.jpg'
+                tar = path
+                shutil.copy(src, tar)
+            li.append(
+                r'''\includegraphics[width=0.2\textwidth]{images/''' + url + r'''PIC}'''.replace('PIC',                                                                                str(key) + ".jpg"))
+        return li
+    ANS=[]
+    m={'主角':[],'配角':[],'客串':[]}
+    for x in character_data.keys():
+        if character_data[x]['download']==True:
+            m[character_data[x]['role']].append(x)
+    def add(role,number):
+        main=m['role']
+        random.shuffle(main)
+        main1=main[:number]
+        for x in main1:
+            random.shuffle(main)
+            tmp=main[:4]+[x]
+            random.shuffle(tmp)
+            tmp1=[]
+            for x1 in range(len(tmp)):
+                if character_data[tmp[x1]]['name'][1] != None:
+                    name = character_data[tmp[x1]]['name'][1]
+                else:
+                    name = character_data[tmp[x1]]['name'][0]
+                if tmp[x1]==x:
+                    ANS.append(chr(ord('A')+x1))
+                tmp1.append(chr(ord('A')+x1)+':'+ ' '+name+r'\\')
+                tmp1=add_pic(character_data_total, tmp[x1],'character/', tmp)
+                tmp1.append(r'\newline')
+        return tmp1
+
+    #15 主角 10 配角 5 客串 每个2分 60
+    #10部作品 四个ep名字 每个3分 30
+    #5部作品的OP+ED名 2分
+    path = "simsun.ttc"
+    if not os.path.exists(path):
+        src = total_menu + "save/test/simsun.ttc"
+        tar = path
+        shutil.copy(src, tar)
+    with open(init_menu+'save/test/test.tex','w',encoding='utf-8') as f:
+        ANS.append('第一部分')
+        m=overleaf.Main_Test_textex
+        a=add('主角',15)+add('配角', 10)+ add('客串', 5)
+        m.replace('te1st',"".join(a))
+        b=[]
+        for x in cartoon_data.keys():
+            if len(cartoon_data[x]['ep'])>10:
+                b.append(x)
+        c=[]
+        ANS.append('第三部分')
+        for x in cartoon_data.keys():
+            if '片头曲' in cartoon_data[x].keys() and '片尾曲' in cartoon_data[x].keys():
+                c.append(x)
+        for x in c:
+            random.shuffle(c)
+            tmp=c[:4]+[x]
+            random.shuffle(c)
+            tmp1=[]
+            tmp1.append('片头曲:'+cartoon_data[x]['片头曲']+r'//'+'片尾曲'+cartoon_data[x]['片尾曲']+r'//')
+            for x1 in range(len(tmp)):
+                if tmp[x1]==x:
+                    ANS.append(chr(ord('A')+x1))
+                tmp1.append(chr(ord('A')+x1)+':'+ ' '+cartoon_data[tmp[x1]]['中文名']+r'\\')
+        m.replace('te3st', "".join(c))
+        f.write(m)
+    print(ANS)
 
 def draw():
     plt.rcParams['font.sans-serif'] = ['SimSun']  # 宋体
@@ -284,7 +348,7 @@ CH,PE=get_norml_result()
 CH_RA=get_character_rank()
 PE_RA=get_person_rank()
 draw()
-tmp=list([x,cartoon_data[x]['中文名'],cartoon_data[x]['放送开始'],cartoon_data[x]['rank']] for x in cartoon_data.keys())
+tmp=list([x,cartoon_data[x]['中文名'],cartoon_data[x]['放送开始'],cartoon_data[x]['rank']] for x in cartoon_data.keys() if cartoon_data[x]['放送开始']!=None and cartoon_data[x]['rank']!='')
 tmp1=sorted(tmp,key=lambda x:result.D2I(x[2]))
 ANI1=tmp1[0]
 ANI2=tmp1[-1]
@@ -293,7 +357,7 @@ ANI3=tmp2[0]
 ANI4=tmp2[-1]
 print(ANI1)
 def main(user):
-    path = init_menu + "save/overleaf/simsun.ttc"
+    path = "simsun.ttc"
     if not os.path.exists(path):
         src = total_menu + "save/simsun.ttc"
         tar = path
@@ -408,34 +472,35 @@ def main(user):
             els1=[] #存角色地址
             for x in person_data[m[0]]['src']:
                 flg=False
-                tmp=[r'来自%s的 '%cartoon_data[x]['中文名']]
-                for x1 in m[1]:
-                    if x==character_data[x1]['src']:
-                        name=character_data[x1]['name']
-                        if name[1] != None:
-                            name = name[1]
-                        else:
-                            name = name[0]
-                        tmp.append(r'%s\\'%name)
-                        a_2.append(x1)
-                        flg=True
-                if flg:
-                    tmp.append(r'\\')
-                    a=a+tmp
-                else:#除了当前角色外担任的别的角色
-                    for x1 in person_data[m[0]]['ch']:
-                        if x == character_data[x1]['src']:
-                            name = character_data[x1]['name']
-                            if name[1] != None and name[1] != "" :
+                if x in cartoon_data.keys():
+                    tmp=[r'来自%s的 '%cartoon_data[x]['中文名']]
+                    for x1 in m[1]:
+                        if x==character_data[x1]['src']:
+                            name=character_data[x1]['name']
+                            if name[1] != None:
                                 name = name[1]
                             else:
                                 name = name[0]
-                            tmp.append(r'%s %s\\' % (character_data[x1]['role'],name))
-                            els1.append(x1)
+                            tmp.append(r'%s\\'%name)
+                            a_2.append(x1)
                             flg=True
                     if flg:
                         tmp.append(r'\\')
-                        els+=tmp
+                        a=a+tmp
+                    else:#除了当前角色外担任的别的角色
+                        for x1 in person_data[m[0]]['ch']:
+                            if x == character_data[x1]['src']:
+                                name = character_data[x1]['name']
+                                if name[1] != None and name[1] != "" :
+                                    name = name[1]
+                                else:
+                                    name = name[0]
+                                tmp.append(r'%s %s\\' % (character_data[x1]['role'],name))
+                                els1.append(x1)
+                                flg=True
+                        if flg:
+                            tmp.append(r'\\')
+                            els+=tmp
             a.append(r'\\')
 
             count = 0
@@ -488,9 +553,10 @@ def main(user):
         m=overleaf.Potential_Future_Directions_tex
         f.write(m)
 
-main('plain')
+main('薛定谔的猫')
 
     # USER看番数为 LOOK_COUNT1（系列作合并）\\
     # USER等效总计看番部数为 LOOK_COUNT2\\
     # USER所看番剧所发布时间中位数为 MEDIUM\\
     # 本次爬取动漫角色声优数： CH_COUNT\\声优数：PE_COUNT\\
+#generate()
